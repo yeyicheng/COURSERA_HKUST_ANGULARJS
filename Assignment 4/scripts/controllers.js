@@ -48,7 +48,7 @@ angular.module('confusionApp')
                         
         }])
 
-        .controller('FeedbackController', ['$scope', function($scope) {
+        .controller('FeedbackController', 'feedbackFactory', ['$scope', 'feedbackFactory', function($scope, feedbackFactory) {
             
             $scope.sendFeedback = function() {
                 
@@ -63,7 +63,13 @@ angular.module('confusionApp')
                     $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"" };
                     $scope.feedback.mychannel="";
                     $scope.feedbackForm.$setPristine();
-                    console.log($scope.feedback);
+                    
+					feedbackFactory.getFeedback().$save(null, $scope.feedback)
+					.$promise.then(function(){
+						console.log("Feedback posted successfully!");
+					}, function(){	
+						console.log("Fail to post feedback!");
+					});
                 }
             };
         }])
@@ -96,12 +102,44 @@ angular.module('confusionApp')
         // implement the IndexController and About Controller here
 		.controller('IndexController',  ['$scope', 'menuFactory', 'corporateFactory', function($scope, menuFactory, corporateFactory) {
 			$scope.dish = menuFactory.getDish(0);
-			$scope.promotion = menuFactory.getPromotion(0);
-			$scope.chief = corporateFactory.getLeader[3];
+			
+			$scope.showPromotion = false;
+			$scope.promotion = menuFactory.getPromotion().get(id:0})
+			.$promise.then(
+				function(response){
+					$scope.promotion = response;
+					$scope.showPromotion = true;
+				},
+				function(response) {
+					$scope.messagePromotion = "Error: "+response.status + " " + response.statusText;
+				}
+            );
+			
+			$scope.showLeader = false;
+			$scope.chief = corporateFactory.getLeader().get({id:3})
+			.$promise.then(
+				function(response){
+					$scope.chief = response;
+					$scope.showLeader = true;
+				},
+				function(response) {
+					$scope.messageLeader = "Error: "+response.status + " " + response.statusText;
+				}
+			);
 		}])
 		
 		.controller('AboutController', ['$scope', 'corporateFactory', function($scope, corporateFactory) {
-			$scope.leaders = corporateFactory.getLeaders();
+			$scope.showLeaders = false;
+			$scope.leaders = corporateFactory.getLeader().query()
+			.$promise.then(
+				function(response){
+					$scope.chief = response;
+					$scope.showLeaders = true;
+				},
+				function(response) {
+					$scope.message = "Error: "+response.status + " " + response.statusText;
+				}
+			);
 		}])
 
 ;
